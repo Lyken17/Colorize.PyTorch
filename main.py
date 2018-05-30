@@ -40,17 +40,25 @@ def train(args):
 
             return pilimg
 
+    from transforms.color_space import Linearize, SRGB2XYZ, XYZ2CIE
+
+    SRGB2LMS = transforms.Compose([
+        Linearize(),
+        SRGB2XYZ(),
+        XYZ2CIE(),
+    ])
+
     transform = transforms.Compose([
         transforms.Resize(args.image_size),
         transforms.CenterCrop(args.image_size),
-        RGB2YUV(),
         transforms.ToTensor(),
-        # transforms.Lambda(lambda x: x.mul(255))
+        SRGB2LMS
     ])
+
     train_dataset = datasets.ImageFolder(args.dataset, transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, **kwargs)
 
-    transformer = TransformerNet(in_channels=1, out_channels=2)  # input: Y, predict: UV
+    transformer = TransformerNet(in_channels=2, out_channels=1)  # input: L S, predict: M
     optimizer = Adam(transformer.parameters(), args.lr)
     mse_loss = torch.nn.MSELoss()
 
@@ -74,11 +82,12 @@ def train(args):
             n_batch = len(imgs)
             count += n_batch
             optimizer.zero_grad()
-            # First channel
-            x = imgs[:, :1, :, :].clone()
-            # Second and third channels
-            gt = imgs[:, 1:, :, :].clone()
+            # L & S channel
+            x = torch.cat([imgs[:, :1, :, :].clone(), imgs[:, -1:, :, :].clone()], dim=1)
+            # M channels
+            gt = imgs[:, 1:2, :, :].clone()
 
+            # print(x.size(), gt.size())
             if args.cuda:
                 x = x.cuda()
                 gt = gt.cuda()
@@ -90,11 +99,11 @@ def train(args):
             optimizer.step()
 
             if (batch_id + 1) % args.log_interval == 0:
-                mesg = "{}\tEpoch {}:\t[{}/{}]\ttotal: {:.6f}".format(
+                msg = "{}\tEpoch {}:\t[{}/{}]\ttotal: {:.6f}".format(
                     time.ctime(), e + 1, count, len(train_dataset),
                                   total_loss / (batch_id + 1)
                 )
-                print(mesg)
+                print(msg)
 
     # save model
     transformer.eval()
