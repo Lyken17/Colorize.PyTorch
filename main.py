@@ -74,10 +74,12 @@ def train(args):
         transformer.cuda()
 
     for e in range(args.epochs):
+        # initialization
         transformer.train()
-        # agg_content_loss = 0.
-        # agg_style_loss = 0.
         count = 0
+        moving_loss = 0.0
+
+        # Train one epoch
         for batch_id, (imgs, _) in enumerate(train_loader):
             n_batch = len(imgs)
             count += n_batch
@@ -98,21 +100,22 @@ def train(args):
             total_loss.backward()
             optimizer.step()
 
-            if (batch_id + 1) % args.log_interval == 0:
-                msg = "{} Epoch {}:\t[{}/{}]\ttotal: {:.6f}".format(
+            moving_loss = moving_loss * 0.9 + total_loss.item() * 0.1
+
+            if batch_id % args.log_interval == 0:
+                msg = "{} | Epoch {}:\t[{}/{}]\ttotal: {:.6f} ({:.6f})".format(
                     time.ctime(), e + 1, batch_id, len(train_loader),
-                                  total_loss / (batch_id + 1)
-                )
+                    total_loss.item(), moving_loss)
                 print(msg)
 
-    # save model
-    transformer.eval()
-    transformer.cpu()
-    save_model_filename = "epoch_" + str(args.epochs) + "_" + str(time.ctime()).replace(' ', '_') + "_" + str(
-        args.content_weight) + "_" + str(args.style_weight) + ".model"
-    os.makedirs(args.save_model_dir, exist_ok=True)
-    save_model_path = os.path.join(args.save_model_dir, save_model_filename)
-    torch.save(transformer.state_dict(), save_model_path)
+        # Evaluation and save model
+        transformer.eval()
+        transformer.cpu()
+        save_model_filename = "epoch_" + str(args.epochs) + "_" + str(time.ctime()).replace(' ', '_') \
+                              + "_" + str("%.6f" % moving_loss) + ".model"
+        os.makedirs(args.save_model_dir, exist_ok=True)
+        save_model_path = os.path.join(args.save_model_dir, save_model_filename)
+        torch.save(transformer.state_dict(), save_model_path)
 
     print("\nDone, trained model saved at", save_model_path)
 
