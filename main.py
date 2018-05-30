@@ -110,7 +110,7 @@ def train(args):
 
         # Evaluation and save model
         transformer.eval()
-        transformer.cpu()
+        # transformer.cpu()
         save_model_filename = "epoch_" + str(args.epochs) + "_" + str(time.ctime()).replace(' ', '_') \
                               + "_" + str("%.6f" % moving_loss) + ".model"
         os.makedirs(args.save_model_dir, exist_ok=True)
@@ -154,7 +154,7 @@ def main():
 
     train_arg_parser = subparsers.add_parser("train",
                                              help="parser for training arguments")
-    train_arg_parser.add_argument("--epochs", type=int, default=2,
+    train_arg_parser.add_argument("--epochs", type=int, default=30,
                                   help="number of training epochs, default is 2")
     train_arg_parser.add_argument("--batch-size", type=int, default=4,
                                   help="batch size for training, default is 4")
