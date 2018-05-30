@@ -176,7 +176,7 @@ def main():
                                   help="weight for style-loss, default is 5.0")
     train_arg_parser.add_argument("--lr", type=float, default=1e-3,
                                   help="learning rate, default is 0.001")
-    train_arg_parser.add_argument("--log-interval", type=int, default=500,
+    train_arg_parser.add_argument("--log-interval", type=int, default=10,
                                   help="number of images after which the training loss is logged, default is 500")
 
     eval_arg_parser = subparsers.add_parser("eval", help="parser for evaluation/stylizing arguments")
