@@ -25,7 +25,7 @@ def train(args):
 
     if args.cuda:
         torch.cuda.manual_seed(args.seed)
-        kwargs = {'num_workers': 0, 'pin_memory': False}
+        kwargs = {'num_workers': 12, 'pin_memory': False}
     else:
         kwargs = {}
 
@@ -100,7 +100,7 @@ def train(args):
 
             if (batch_id + 1) % args.log_interval == 0:
                 msg = "{}\tEpoch {}:\t[{}/{}]\ttotal: {:.6f}".format(
-                    time.ctime(), e + 1, count, len(train_dataset),
+                    time.ctime(), e + 1, count, len(train_loader),
                                   total_loss / (batch_id + 1)
                 )
                 print(msg)
