@@ -16,7 +16,7 @@ from torchvision import datasets
 from torchvision import transforms
 
 import utils
-from transformer_net import TransformerNet
+from model import TransformerNet
 
 
 def train(args):
