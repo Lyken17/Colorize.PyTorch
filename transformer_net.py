@@ -8,6 +8,7 @@ import numpy as np
 # Instance normalization
 # FNN pytorch implementation
 
+
 class TransformerNet(torch.nn.Module):
     def __init__(self, in_channels=3, out_channels=3):
         super(TransformerNet, self).__init__()
@@ -113,6 +114,9 @@ class UpsampleConvLayer(torch.nn.Module):
         out = self.conv2d(out)
         return out
 
+
+# TODO: replace with torch official's implementation
+# InstanceNormalization = nn.InstanceNorm2d
 
 class InstanceNormalization(torch.nn.Module):
     """InstanceNormalization

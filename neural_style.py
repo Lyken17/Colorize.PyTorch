@@ -50,7 +50,7 @@ def train(args):
     train_dataset = datasets.ImageFolder(args.dataset, transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, **kwargs)
 
-    transformer = TransformerNet(in_channels=1, out_channels=2) # input: Y, predict: UV
+    transformer = TransformerNet(in_channels=1, out_channels=2)  # input: Y, predict: UV
     optimizer = Adam(transformer.parameters(), args.lr)
     mse_loss = torch.nn.MSELoss()
 
@@ -64,17 +64,6 @@ def train(args):
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA is requested, but related driver/device is not set properly.")
         transformer.cuda()
-        # vgg.cuda()
-
-    # style = utils.tensor_load_rgbimage(args.style_image, size=args.style_size)
-    # style = style.repeat(args.batch_size, 1, 1, 1)
-    # style = utils.preprocess_batch(style)
-    # if args.cuda:
-    #     style = style.cuda()
-    # style_v = Variable(style, volatile=True)
-    # style_v = utils.subtract_imagenet_mean_batch(style_v)
-    # features_style = vgg(style_v)
-    # gram_style = [utils.gram_matrix(y) for y in features_style]
 
     for e in range(args.epochs):
         transformer.train()
@@ -85,8 +74,9 @@ def train(args):
             n_batch = len(imgs)
             count += n_batch
             optimizer.zero_grad()
-
+            # First channel
             x = imgs[:, :1, :, :].clone()
+            # Second and third channels
             gt = imgs[:, 1:, :, :].clone()
 
             if args.cuda:
