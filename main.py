@@ -99,8 +99,8 @@ def train(args):
             optimizer.step()
 
             if (batch_id + 1) % args.log_interval == 0:
-                msg = "{}\tEpoch {}:\t[{}/{}]\ttotal: {:.6f}".format(
-                    time.ctime(), e + 1, count, len(train_loader),
+                msg = "{} Epoch {}:\t[{}/{}]\ttotal: {:.6f}".format(
+                    time.ctime(), e + 1, batch_id, len(train_loader),
                                   total_loss / (batch_id + 1)
                 )
                 print(msg)
