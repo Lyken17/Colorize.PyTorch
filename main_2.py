@@ -16,7 +16,7 @@ from torchvision import datasets
 from torchvision import transforms
 
 import utils
-from model import TransformerNet
+from model import TransformerNet, LinearNet
 
 
 def train(args):
@@ -58,7 +58,7 @@ def train(args):
     train_dataset = datasets.ImageFolder(args.dataset, transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, **kwargs)
 
-    transformer = TransformerNet(in_channels=2, out_channels=1)  # input: L S, predict: M
+    transformer = LinearNet(in_channels=2, out_channels=1)  # input: L S, predict: M
     optimizer = Adam(transformer.parameters(), args.lr)
     mse_loss = torch.nn.MSELoss()
 
@@ -77,7 +77,9 @@ def train(args):
         # initialization
         transformer.train()
         count = 0
+
         moving_loss = 0.0
+
 
         # Train one epoch
         for batch_id, (imgs, _) in enumerate(train_loader):
@@ -108,10 +110,14 @@ def train(args):
                     total_loss.item(), moving_loss)
                 print(msg)
 
+            if batch_id % (args.log_interval * 10) == 0:
+                print(transformer)
+                print(transformer.module.linear.weight)
+
         # Evaluation and save model
         transformer.eval()
         # transformer.cpu()
-        save_model_filename = "epoch_" + str(e) + "_" + str(time.ctime()).replace(' ', '_') \
+        save_model_filename = "epoch_" + str(args.epochs) + "_" + str(time.ctime()).replace(' ', '_') \
                               + "_" + str("%.6f" % moving_loss) + ".model"
         os.makedirs(args.save_model_dir, exist_ok=True)
         save_model_path = os.path.join(args.save_model_dir, save_model_filename)

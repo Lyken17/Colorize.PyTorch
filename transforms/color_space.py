@@ -34,6 +34,7 @@ class Gamma(object):
 
 
 class Linearize(object):
+    # https://en.wikipedia.org/wiki/SRGB
     def __init__(self, power=2):
         self.power = power
 
@@ -43,6 +44,21 @@ class Linearize(object):
 
         tensor[tensor < 0.04045] /= 12.92
         tensor[tensor > 0.04045] = ((tensor[tensor > 0.04045] + alpha) / (1 + alpha)) ** 2.4
+
+        return tensor
+
+
+class DeLinearize(object):
+    # https://en.wikipedia.org/wiki/SRGB
+    def __init__(self, power=2):
+        self.power = power
+
+    def __call__(self, tensor):
+        assert tensor.size(0) == 3
+        alpha = 0.055
+
+        tensor[tensor < 0.0031308] *= 12.92
+        tensor[tensor > 0.0031308] = (1 + alpha) * tensor[tensor > 0.0031308] ** (1 / 2.4) - alpha
 
         return tensor
 
@@ -76,6 +92,19 @@ class SRGB2XYZ(__color_space_convert):
         super(SRGB2XYZ, self).__init__(mat=mat)
 
 
+class XYZ2SRGB(__color_space_convert):
+    # D65
+    # https://en.wikipedia.org/wiki/SRGB
+    def __init__(self):
+        origin_mat = torch.Tensor(
+            [[0.4124564, 0.3575761, 0.1804375],
+             [0.2126729, 0.7151522, 0.0721750],
+             [0.0193339, 0.1191920, 0.9503041]]
+        )
+        mat = torch.inverse(origin_mat)
+        super(XYZ2SRGB, self).__init__(mat=mat)
+
+
 class XYZ2CIE(__color_space_convert):
     def __init__(self):
         mat = torch.Tensor(
@@ -84,3 +113,14 @@ class XYZ2CIE(__color_space_convert):
              [0.0, 0.0, 0.9182]]
         )
         super(XYZ2CIE, self).__init__(mat=mat)
+
+
+class CIE2XYZ(__color_space_convert):
+    def __init__(self):
+        origin_mat = torch.Tensor(
+            [[0.4002, 0.7076, -0.0808],
+             [-0.2263, 1.1653, 0.0457],
+             [0.0, 0.0, 0.9182]]
+        )
+        mat = torch.inverse(origin_mat)
+        super(CIE2XYZ, self).__init__(mat=mat)

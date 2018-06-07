@@ -9,6 +9,21 @@ import numpy as np
 # FNN pytorch implementation
 
 
+class LinearNet(nn.Module):
+    def __init__(self, in_channels=2, out_channels=1):
+        super(LinearNet, self).__init__()
+        # self.in1 = in_channels * 256 * 256
+        # self.out1 = out_channels * 256 * 256
+        self.linear = nn.Linear(in_channels, out_channels, bias=False)
+
+    def forward(self, input):
+        # in_size = input.size()
+        xin = input.permute(0, 2, 3, 1)
+        xout = self.linear(xin)
+        res = xout.permute(0, 3, 1, 2)
+        return res
+
+
 class TransformerNet(torch.nn.Module):
     def __init__(self, in_channels=3, out_channels=3):
         super(TransformerNet, self).__init__()
@@ -148,3 +163,11 @@ class InstanceNormalization(torch.nn.Module):
         out = (x - mean) / torch.sqrt(var + self.eps)
         out = out * scale_broadcast + shift_broadcast
         return out
+
+
+if __name__ == '__main__':
+    din = torch.ones(3, 2, 32, 32)
+    dout = torch.ones(3, 1, 32, 32)
+    net = LinearNet()
+
+    print(net(din).size())
