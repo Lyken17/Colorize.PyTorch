@@ -1,4 +1,5 @@
 import os
+import sys
 
 import numpy as np
 import torch
@@ -72,3 +73,14 @@ def init_vgg16(model_folder):
         for (src, dst) in zip(vgglua.parameters()[0], vgg.parameters()):
             dst.data[:] = src
         torch.save(vgg.state_dict(), os.path.join(model_folder, 'vgg16.weight'))
+
+
+def check_paths(args):
+    try:
+        # if not os.path.exists(args.vgg_model_dir):
+        #     os.makedirs(args.vgg_model_dir)
+        if not os.path.exists(args.save_model_dir):
+            os.makedirs(args.save_model_dir)
+    except OSError as e:
+        print(e)
+        sys.exit(1)

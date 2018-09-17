@@ -40,7 +40,7 @@ class TransformerNet(torch.nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, X):
-        in_X = X
+        in_X = self.init_norm(X)
         y = self.relu(self.in1(self.conv1(in_X)))
         y = self.relu(self.in2(self.conv2(y)))
         y = self.relu(self.in3(self.conv3(y)))
